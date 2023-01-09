@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AIO Help</string>
+    <string name="Image1">Carpenter</string>
+    <string name="Image2">Plumber</string>
+    <string name="Image3">Gardener</string>
+    <string name="Image4">House Cleaner</string>
+    <string name="Image5">Laundry</string>
+</resources>

@@ -1,0 +1,250 @@
+package com.project.aiohelp
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
+import androidx.navigation.NavController
+
+@Composable
+fun Setup(navController: NavController) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.padding(60.dp, 80.dp, 10.dp, 0.dp)
+        ) {
+            Text(
+                text = "Are you a \nCustomer \nor a \nWorker?",
+                style = MaterialTheme.typography.displaySmall
+            )
+        }
+    }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+            Button(
+                onClick = { navController.navigate(Screen.UserForm.route) },
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(50.dp)
+            ) {
+                Text(text = "Customer", fontSize = 20.sp)
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+            Button(
+                onClick = { navController.navigate(Screen.WorkerForm.route) },
+                modifier = Modifier
+                    .width(250.dp)
+                    .height(50.dp)
+            ) {
+                Text(text = "Worker", fontSize = 20.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun WorkerForm(navController: NavController) {
+    var name by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    var selectedItem by remember { mutableStateOf("") }
+    var textFieldSize by remember { mutableStateOf(Size.Zero) }
+    val jobs = listOf("Carpenter", "Plumber", "Gardener", "House Cleaner", "Laundry")
+    val icon = if (expanded) {
+        Icons.Filled.KeyboardArrowUp
+    } else {
+        Icons.Filled.KeyboardArrowDown
+    }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(10.dp, 80.dp), verticalArrangement = Arrangement.Top
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+            Text(
+                text = "Fill your information",
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
+    }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = {
+                Text(
+                    text = "Name"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text, capitalization = KeyboardCapitalization.Words
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(value = age, onValueChange = { age = it }, label = {
+                Text(
+                    text = "Age"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(
+                value = selectedItem,
+                onValueChange = { selectedItem = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        textFieldSize = coordinates.size.toSize()
+                    },
+                label = { Text("Work") },
+                trailingIcon = {
+                    Icon(icon, "Open menu", Modifier.clickable { expanded = !expanded })
+                },
+                readOnly = true
+            )
+            DropdownMenu(modifier = Modifier
+                .width(IntrinsicSize.Max)
+                .onGloballyPositioned { coordinates ->
+                    textFieldSize = coordinates.size.toSize()
+                }, expanded = expanded, onDismissRequest = { expanded = false }) {
+                jobs.forEach { work ->
+                    DropdownMenuItem(text = { Text(text = work) }, onClick = {
+                        selectedItem = work
+                        expanded = false
+                    })
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Button(
+            onClick = { /*TODO*/ },
+            contentPadding = PaddingValues(15.dp, 10.dp),
+            shape = RoundedCornerShape(30.dp),
+            modifier = Modifier.padding(25.dp, 80.dp)
+        ) {
+            Icon(Icons.Filled.Check, contentDescription = "Submit", modifier = Modifier.size(25.dp))
+            Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
+        }
+    }
+}
+
+@Composable
+fun UserForm(navController: NavController) {
+    var name by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf(false) }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(10.dp, 80.dp), verticalArrangement = Arrangement.Top
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+            Text(
+                text = "Fill your information",
+                style = MaterialTheme.typography.displayMedium
+            )
+        }
+    }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(
+                value = name,
+                onValueChange =
+                {
+                    name = it
+                    error = false
+                },
+                isError = error,
+                label = {
+                    Text(
+                        text = "Name"
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text, capitalization = KeyboardCapitalization.Words
+                ),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Button(
+            onClick =
+            {
+                if (name != "") navController.navigate(Screen.UserMain.route)
+                else error = true
+            },
+            contentPadding = PaddingValues(15.dp, 10.dp),
+            shape = RoundedCornerShape(30.dp),
+            modifier = Modifier.padding(25.dp, 80.dp)
+        ) {
+            Icon(Icons.Filled.Check, contentDescription = "Submit", modifier = Modifier.size(25.dp))
+            Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
+        }
+
+    }
+}
