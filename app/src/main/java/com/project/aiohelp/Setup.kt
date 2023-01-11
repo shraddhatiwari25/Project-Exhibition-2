@@ -1,9 +1,7 @@
 package com.project.aiohelp
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -16,10 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -182,7 +178,10 @@ fun WorkerForm(navController: NavController) {
 
 @Composable
 fun UserForm(navController: NavController) {
+    val dbManipulation = DBManipulation()
     var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
     Column(
         Modifier
@@ -226,6 +225,52 @@ fun UserForm(navController: NavController) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(
+                value = email,
+                onValueChange =
+                {
+                    email = it
+                    error = false
+                },
+                isError = error,
+                label = {
+                    Text(
+                        text = "Email"
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email, capitalization = KeyboardCapitalization.None
+                ),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(
+                value = password,
+                onValueChange =
+                {
+                    password = it
+                    error = false
+                },
+                isError = error,
+                label = {
+                    Text(
+                        text = "Password"
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password, capitalization = KeyboardCapitalization.None
+                ),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -235,7 +280,10 @@ fun UserForm(navController: NavController) {
         Button(
             onClick =
             {
-                if (name != "") navController.navigate(Screen.UserMain.route)
+                if (name.isNotEmpty()) {
+                    dbManipulation.addCustomer(name.trim(), email.trim(), password.trim())
+                    navController.navigate(Screen.UserMain.route)
+                }
                 else error = true
             },
             contentPadding = PaddingValues(15.dp, 10.dp),

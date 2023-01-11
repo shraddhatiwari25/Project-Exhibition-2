@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "243422216001",
+    "project_id": "aio-help",
+    "storage_bucket": "aio-help.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243422216001:android:9bb77f310dc20aead16bc0",
+        "android_client_info": {
+          "package_name": "com.project.aiohelp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "243422216001-aj2q14s3ron7dop94ft4q53gnt958e69.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDp3iyJYfZJPhYMNORwK2iqQH6Ipv0mOto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "243422216001-aj2q14s3ron7dop94ft4q53gnt958e69.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
