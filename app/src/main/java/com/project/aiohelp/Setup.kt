@@ -72,6 +72,7 @@ fun Setup(navController: NavController) {
 
 @Composable
 fun WorkerForm(navController: NavController) {
+    val dbManipulation = DBManipulation()
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
@@ -165,7 +166,12 @@ fun WorkerForm(navController: NavController) {
         verticalArrangement = Arrangement.Bottom
     ) {
         Button(
-            onClick = { /*TODO*/ },
+            onClick = {
+                if (name.isNotEmpty()) {
+                dbManipulation.addCustomer(name.trim(),age.trim(),selectedItem.trim())
+                //email.trim(), password.trim())
+                navController.navigate(Screen.UserMain.route)
+            } },
             contentPadding = PaddingValues(15.dp, 10.dp),
             shape = RoundedCornerShape(30.dp),
             modifier = Modifier.padding(25.dp, 80.dp)
