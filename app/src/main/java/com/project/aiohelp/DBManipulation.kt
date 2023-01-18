@@ -1,20 +1,14 @@
 package com.project.aiohelp
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.project.aiohelp.data.UserModel
 import com.project.aiohelp.data.WorkerModel
-import kotlinx.coroutines.tasks.await
 
 
 class DBManipulation {
-    private val database =
-        Firebase.database("https://aio-help-default-rtdb.asia-southeast1.firebasedatabase.app")
     private val db = Firebase.firestore
 
     fun addCustomer(name: String, email: String, pass: String) {
