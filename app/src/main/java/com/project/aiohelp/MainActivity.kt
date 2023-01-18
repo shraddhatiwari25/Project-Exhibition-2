@@ -6,8 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -50,13 +53,16 @@ fun UserMain(navController: NavController) {
         verticalArrangement = Arrangement.Top, modifier = Modifier
             .padding(20.dp, 80.dp)
     ) {
+
+        // Carpenter
+
         Card(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { /* TODO */ },
+                .clickable { navController.navigate(Screen.BookingPage.withArgs("Carpenter")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -79,13 +85,15 @@ fun UserMain(navController: NavController) {
             }
         }
 
+        // Plumber
+
         Card(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { /* TODO */ },
+                .clickable { navController.navigate(Screen.BookingPage.withArgs("Plumber")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -107,13 +115,16 @@ fun UserMain(navController: NavController) {
                 )
             }
         }
+
+        // Gardener
+
         Card(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { /* TODO */ },
+                .clickable { navController.navigate(Screen.BookingPage.withArgs("Gardener")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -135,13 +146,16 @@ fun UserMain(navController: NavController) {
                 )
             }
         }
+
+        // House Cleaner
+
         Card(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { /* TODO */ },
+                .clickable { navController.navigate(Screen.BookingPage.withArgs("House Cleaner")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -163,13 +177,16 @@ fun UserMain(navController: NavController) {
                 )
             }
         }
+
+        // Laundry
+
         Card(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { /* TODO */ },
+                .clickable { navController.navigate(Screen.BookingPage.withArgs("Laundry")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -195,9 +212,39 @@ fun UserMain(navController: NavController) {
 }
 
 
-@Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    AIOHelpTheme {
+fun BookingPage(navController: NavController, job: String) {
+    val dbManipulation = DBManipulation()
+    val workerList = dbManipulation.getWorker(job)
+    TopAppBar(title = { Text(text = "Available Workers") }, navigationIcon = {
+        IconButton(onClick = { navController.navigateUp() }) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
+        }
+    })
+
+    LazyColumn(
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier.padding(20.dp, 80.dp)
+    ) {
+        itemsIndexed(workerList) { index, _ ->
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .padding(0.dp, 10.dp)
+                    .height(100.dp)
+                    .fillMaxWidth()
+                    .clickable { /* TODO */ },
+                elevation = CardDefaults.cardElevation(10.dp, 5.dp)
+            ) {
+                Column {
+                    workerList[index]?.name?.let {
+                        Text(text = it)
+                    }
+                    workerList[index]?.age?.let {
+                        Text(text = it)
+                    }
+                }
+            }
+        }
     }
 }

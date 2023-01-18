@@ -74,6 +74,8 @@ fun Setup(navController: NavController) {
 fun WorkerForm(navController: NavController) {
     val dbManipulation = DBManipulation()
     var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var pass by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf("") }
@@ -84,16 +86,17 @@ fun WorkerForm(navController: NavController) {
     } else {
         Icons.Filled.KeyboardArrowDown
     }
-
     Column(
         Modifier
             .fillMaxSize()
             .padding(10.dp, 80.dp), verticalArrangement = Arrangement.Top
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(10.dp)
+        ) {
             Text(
-                text = "Fill your information",
-                style = MaterialTheme.typography.displayMedium
+                text = "Fill your information", style = MaterialTheme.typography.displayMedium
             )
         }
     }
@@ -112,7 +115,8 @@ fun WorkerForm(navController: NavController) {
                     text = "Name"
                 )
             }, keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text, capitalization = KeyboardCapitalization.Words
+                keyboardType = KeyboardType.Text,
+                capitalization = KeyboardCapitalization.Words
             ), singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
@@ -125,6 +129,30 @@ fun WorkerForm(navController: NavController) {
                 )
             }, keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(value = email, onValueChange = { email = it }, label = {
+                Text(
+                    text = "Email"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(value = pass, onValueChange = { pass = it }, label = {
+                Text(
+                    text = "Password"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password
             ), singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
@@ -167,18 +195,24 @@ fun WorkerForm(navController: NavController) {
     ) {
         Button(
             onClick = {
-                if (name.isNotEmpty()) {
-                dbManipulation.addCustomer(name.trim(),age.trim(),selectedItem.trim())
-                //email.trim(), password.trim())
-                navController.navigate(Screen.UserMain.route)
-            } },
+                if (name.isNotEmpty() and email.isNotEmpty() and age.isNotEmpty() and pass.isNotEmpty() and selectedItem.isNotEmpty()) {
+                    dbManipulation.addWorker(
+                        name.trim(), age.trim(), email.trim(), pass, selectedItem.trim()
+                    )
+                }
+            },
             contentPadding = PaddingValues(15.dp, 10.dp),
             shape = RoundedCornerShape(30.dp),
             modifier = Modifier.padding(25.dp, 80.dp)
         ) {
-            Icon(Icons.Filled.Check, contentDescription = "Submit", modifier = Modifier.size(25.dp))
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = "Submit",
+                modifier = Modifier.size(25.dp)
+            )
             Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
         }
+
     }
 }
 
@@ -194,10 +228,12 @@ fun UserForm(navController: NavController) {
             .fillMaxSize()
             .padding(10.dp, 80.dp), verticalArrangement = Arrangement.Top
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(10.dp)
+        ) {
             Text(
-                text = "Fill your information",
-                style = MaterialTheme.typography.displayMedium
+                text = "Fill your information", style = MaterialTheme.typography.displayMedium
             )
         }
     }
@@ -211,70 +247,49 @@ fun UserForm(navController: NavController) {
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
         ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange =
-                {
-                    name = it
-                    error = false
-                },
-                isError = error,
-                label = {
-                    Text(
-                        text = "Name"
-                    )
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text, capitalization = KeyboardCapitalization.Words
-                ),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            OutlinedTextField(value = name, onValueChange = {
+                name = it
+                error = false
+            }, isError = error, label = {
+                Text(
+                    text = "Name"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                capitalization = KeyboardCapitalization.Words
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
         ) {
-            OutlinedTextField(
-                value = email,
-                onValueChange =
-                {
-                    email = it
-                    error = false
-                },
-                isError = error,
-                label = {
-                    Text(
-                        text = "Email"
-                    )
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email, capitalization = KeyboardCapitalization.None
-                ),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            OutlinedTextField(value = email, onValueChange = {
+                email = it
+                error = false
+            }, isError = error, label = {
+                Text(
+                    text = "Email"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                capitalization = KeyboardCapitalization.None
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
         ) {
-            OutlinedTextField(
-                value = password,
-                onValueChange =
-                {
-                    password = it
-                    error = false
-                },
-                isError = error,
-                label = {
-                    Text(
-                        text = "Password"
-                    )
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password, capitalization = KeyboardCapitalization.None
-                ),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            OutlinedTextField(value = password, onValueChange = {
+                password = it
+                error = false
+            }, isError = error, label = {
+                Text(
+                    text = "Password"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                capitalization = KeyboardCapitalization.None
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -284,19 +299,23 @@ fun UserForm(navController: NavController) {
         verticalArrangement = Arrangement.Bottom
     ) {
         Button(
-            onClick =
-            {
-                if (name.isNotEmpty()) {
+            onClick = {
+                if (name.isNotEmpty() and email.isNotEmpty() and password.isNotEmpty()) {
                     dbManipulation.addCustomer(name.trim(), email.trim(), password.trim())
+                    navController.popBackStack("SetupScreen", true)
                     navController.navigate(Screen.UserMain.route)
-                }
-                else error = true
+                } else error = true
+
             },
             contentPadding = PaddingValues(15.dp, 10.dp),
             shape = RoundedCornerShape(30.dp),
             modifier = Modifier.padding(25.dp, 80.dp)
         ) {
-            Icon(Icons.Filled.Check, contentDescription = "Submit", modifier = Modifier.size(25.dp))
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = "Submit",
+                modifier = Modifier.size(25.dp)
+            )
             Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
         }
 
