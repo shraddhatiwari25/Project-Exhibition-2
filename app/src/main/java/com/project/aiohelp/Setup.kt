@@ -89,7 +89,7 @@ fun WorkerForm(navController: NavController) {
     Column(
         Modifier
             .fillMaxSize()
-            .padding(10.dp, 80.dp), verticalArrangement = Arrangement.Top
+            .padding(10.dp, 50.dp), verticalArrangement = Arrangement.Top
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -99,14 +99,7 @@ fun WorkerForm(navController: NavController) {
                 text = "Fill your information", style = MaterialTheme.typography.displayMedium
             )
         }
-    }
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
         ) {
@@ -171,7 +164,8 @@ fun WorkerForm(navController: NavController) {
                 trailingIcon = {
                     Icon(icon, "Open menu", Modifier.clickable { expanded = !expanded })
                 },
-                readOnly = true
+                readOnly = true,
+
             )
             DropdownMenu(modifier = Modifier
                 .width(IntrinsicSize.Max)
@@ -199,11 +193,12 @@ fun WorkerForm(navController: NavController) {
                     dbManipulation.addWorker(
                         name.trim(), age.trim(), email.trim(), pass, selectedItem.trim()
                     )
+                    navController.navigate(Screen.UserMain.route)
                 }
             },
             contentPadding = PaddingValues(15.dp, 10.dp),
             shape = RoundedCornerShape(30.dp),
-            modifier = Modifier.padding(25.dp, 80.dp)
+            modifier = Modifier.padding(25.dp, 60.dp)
         ) {
             Icon(
                 Icons.Filled.Check,
@@ -226,7 +221,7 @@ fun UserForm(navController: NavController) {
     Column(
         Modifier
             .fillMaxSize()
-            .padding(10.dp, 80.dp), verticalArrangement = Arrangement.Top
+            .padding(10.dp, 50.dp), verticalArrangement = Arrangement.Top
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

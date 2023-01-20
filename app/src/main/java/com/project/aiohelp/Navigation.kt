@@ -23,12 +23,12 @@ fun Navigation() {
         composable(route = Screen.UserMain.route) {
             UserMain(navController = navController)
         }
-        composable(route = Screen.BookingPage.route + "/{job}", arguments = listOf(navArgument("job") {
+        composable(route = Screen.WorkerList.route + "/{job}", arguments = listOf(navArgument("job") {
             type = NavType.StringType
             nullable = false
         })) { entry ->
             entry.arguments?.getString("job")
-                ?.let { BookingPage(navController = navController, job = it) }
+                ?.let { WorkerList(navController = navController, job = it) }
         }
     }
 }

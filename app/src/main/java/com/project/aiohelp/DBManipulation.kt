@@ -33,7 +33,8 @@ class DBManipulation {
             "age" to age,
             "email" to email,
             "pass" to pass,
-            "job" to job
+            "job" to job,
+            "busy" to false
         )
         db.collection("Workers")
             .add(worker)
@@ -48,7 +49,7 @@ class DBManipulation {
     fun getWorker(job: String): SnapshotStateList<WorkerModel?> {
         val workerList = mutableStateListOf<WorkerModel?>()
 
-        db.collection("Workers").whereEqualTo("job", job).get()
+        db.collection("Workers").whereEqualTo("job", job).whereEqualTo("busy", false).get()
             .addOnSuccessListener { queryDocumentSnapshots ->
                 if (!queryDocumentSnapshots.isEmpty) {
                     val list = queryDocumentSnapshots.documents

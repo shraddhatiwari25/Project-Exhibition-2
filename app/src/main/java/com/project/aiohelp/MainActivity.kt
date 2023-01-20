@@ -12,17 +12,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.project.aiohelp.ui.theme.AIOHelpTheme
+import com.smarttoolfactory.ratingbar.RatingBar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,11 +49,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun UserMain(navController: NavController) {
     TopAppBar(title = { Text(text = "AIO App") }, navigationIcon = {
-        Icon(
-            Icons.Filled.Home,
-            contentDescription = "Home Menu"
+        IconButton(onClick = { navController.navigate(Screen.UserMain.route) }) {
+            Icon(Icons.Filled.Home, contentDescription = "Home Button")
+        }
+    },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
-    })
+    )
     Column(
         verticalArrangement = Arrangement.Top, modifier = Modifier
             .padding(20.dp, 80.dp)
@@ -62,7 +72,7 @@ fun UserMain(navController: NavController) {
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { navController.navigate(Screen.BookingPage.withArgs("Carpenter")) },
+                .clickable { navController.navigate(Screen.WorkerList.withArgs("Carpenter")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -93,7 +103,7 @@ fun UserMain(navController: NavController) {
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { navController.navigate(Screen.BookingPage.withArgs("Plumber")) },
+                .clickable { navController.navigate(Screen.WorkerList.withArgs("Plumber")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -124,7 +134,7 @@ fun UserMain(navController: NavController) {
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { navController.navigate(Screen.BookingPage.withArgs("Gardener")) },
+                .clickable { navController.navigate(Screen.WorkerList.withArgs("Gardener")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -155,7 +165,7 @@ fun UserMain(navController: NavController) {
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { navController.navigate(Screen.BookingPage.withArgs("House Cleaner")) },
+                .clickable { navController.navigate(Screen.WorkerList.withArgs("House Cleaner")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -186,7 +196,7 @@ fun UserMain(navController: NavController) {
                 .padding(0.dp, 10.dp)
                 .height(100.dp)
                 .fillMaxWidth()
-                .clickable { navController.navigate(Screen.BookingPage.withArgs("Laundry")) },
+                .clickable { navController.navigate(Screen.WorkerList.withArgs("Laundry")) },
             elevation = CardDefaults.cardElevation(10.dp, 5.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -213,38 +223,104 @@ fun UserMain(navController: NavController) {
 
 
 @Composable
-fun BookingPage(navController: NavController, job: String) {
+fun WorkerList(navController: NavController, job: String) {
     val dbManipulation = DBManipulation()
     val workerList = dbManipulation.getWorker(job)
-    TopAppBar(title = { Text(text = "Available Workers") }, navigationIcon = {
-        IconButton(onClick = { navController.navigateUp() }) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
-        }
-    })
-
-    LazyColumn(
-        verticalArrangement = Arrangement.Top,
-        modifier = Modifier.padding(20.dp, 80.dp)
-    ) {
-        itemsIndexed(workerList) { index, _ ->
-            Card(
-                shape = RoundedCornerShape(20.dp),
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(text = "Available Workers") },
+            navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        )
+    }, content = {
+        if (!workerList.isEmpty()) {
+            LazyColumn(
+                verticalArrangement = Arrangement.Top,
                 modifier = Modifier
-                    .padding(0.dp, 10.dp)
-                    .height(100.dp)
+                    .padding(it)
                     .fillMaxWidth()
-                    .clickable { /* TODO */ },
-                elevation = CardDefaults.cardElevation(10.dp, 5.dp)
             ) {
-                Column {
-                    workerList[index]?.name?.let {
-                        Text(text = it)
-                    }
-                    workerList[index]?.age?.let {
-                        Text(text = it)
+                itemsIndexed(workerList) { index, _ ->
+                    Card(
+                        shape = RectangleShape,
+                        modifier = Modifier
+                            .height(72.dp)
+                            .clickable { /* TODO */ },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillParentMaxSize(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                imageVector = Icons.Outlined.Person,
+                                contentDescription = "Profile Photo",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.padding(horizontal = 20.dp),
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                            )
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                workerList[index]?.name?.let {
+                                    Text(
+                                        text = "Name: $it",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                                workerList[index]?.age?.let {
+                                    Text(
+                                        text = "Age: $it",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Row(
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp)
+                            ) {
+                                RatingBar(
+                                    rating = 4f,
+                                    imageVectorEmpty = ImageVector.vectorResource(id = R.drawable.star),
+                                    imageVectorFFilled = ImageVector.vectorResource(id = R.drawable.star_full),
+                                    itemSize = 20.dp,
+                                    animationEnabled = false,
+                                    gestureEnabled = false
+                                )
+                            }
+                        }
                     }
                 }
             }
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "No Workers Available\nTry Again Later",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
-    }
+    })
 }
+
