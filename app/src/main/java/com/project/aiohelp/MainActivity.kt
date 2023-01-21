@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.project.aiohelp.ui.theme.AIOHelpTheme
 import com.smarttoolfactory.ratingbar.RatingBar
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,15 +83,16 @@ fun UserMain(navController: NavController) {
                         id = R.string.Image1
                     ),
                     alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.requiredWidth(110.dp)
                 )
                 Text(
                     text = stringResource(id = R.string.Image1),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(60.dp, 0.dp, 0.dp, 0.dp)
                         .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -113,15 +115,16 @@ fun UserMain(navController: NavController) {
                         id = R.string.Image2
                     ),
                     alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.requiredWidth(110.dp)
                 )
                 Text(
                     text = stringResource(id = R.string.Image2),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(60.dp, 0.dp, 0.dp, 0.dp)
                         .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -144,15 +147,16 @@ fun UserMain(navController: NavController) {
                         id = R.string.Image3
                     ),
                     alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier.requiredWidth(110.dp)
                 )
                 Text(
                     text = stringResource(id = R.string.Image3),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(60.dp, 0.dp, 0.dp, 0.dp)
                         .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -175,15 +179,16 @@ fun UserMain(navController: NavController) {
                         id = R.string.Image4
                     ),
                     alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.requiredWidth(110.dp)
                 )
                 Text(
                     text = stringResource(id = R.string.Image4),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(30.dp, 0.dp, 10.dp, 0.dp)
                         .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -206,15 +211,16 @@ fun UserMain(navController: NavController) {
                         id = R.string.Image5
                     ),
                     alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.requiredWidth(110.dp)
                 )
                 Text(
                     text = stringResource(id = R.string.Image5),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .padding(60.dp, 0.dp, 0.dp, 0.dp)
                         .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -224,8 +230,13 @@ fun UserMain(navController: NavController) {
 
 @Composable
 fun WorkerList(navController: NavController, job: String) {
-    val dbManipulation = DBManipulation()
-    val workerList = dbManipulation.getWorker(job)
+    var loading by remember { mutableStateOf(true) }
+    val dbManipulation = remember { DBManipulation() }
+    val workerList = remember { dbManipulation.getWorker(job) }
+    LaunchedEffect(key1 = true) {
+        delay(1000)
+        loading = false
+    }
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(text = "Available Workers") },
@@ -241,84 +252,98 @@ fun WorkerList(navController: NavController, job: String) {
             )
         )
     }, content = {
-        if (!workerList.isEmpty()) {
-            LazyColumn(
-                verticalArrangement = Arrangement.Top,
+        if (loading) {
+            Column(
                 modifier = Modifier
-                    .padding(it)
-                    .fillMaxWidth()
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                itemsIndexed(workerList) { index, _ ->
-                    Card(
-                        shape = RectangleShape,
-                        modifier = Modifier
-                            .height(72.dp)
-                            .clickable { /* TODO */ },
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillParentMaxSize(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
+                CircularProgressIndicator()
+            }
+        } else {
+            if (!workerList.isEmpty()) {
+                loading = false
+                LazyColumn(
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier
+                        .padding(it)
+                        .fillMaxWidth()
+                ) {
+                    itemsIndexed(workerList) { index, _ ->
+                        Card(
+                            shape = RectangleShape,
+                            modifier = Modifier
+                                .height(72.dp)
+                                .clickable { /* TODO */ },
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Image(
-                                imageVector = Icons.Outlined.Person,
-                                contentDescription = "Profile Photo",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.padding(horizontal = 20.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
-                            )
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                workerList[index]?.name?.let {
-                                    Text(
-                                        text = "Name: $it",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                                workerList[index]?.age?.let {
-                                    Text(
-                                        text = "Age: $it",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
                             Row(
-                                horizontalArrangement = Arrangement.End,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp)
+                                modifier = Modifier.fillParentMaxSize(),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                RatingBar(
-                                    rating = 4f,
-                                    imageVectorEmpty = ImageVector.vectorResource(id = R.drawable.star),
-                                    imageVectorFFilled = ImageVector.vectorResource(id = R.drawable.star_full),
-                                    itemSize = 20.dp,
-                                    animationEnabled = false,
-                                    gestureEnabled = false
+                                Image(
+                                    imageVector = Icons.Outlined.Person,
+                                    contentDescription = "Profile Photo",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.padding(horizontal = 20.dp),
+                                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                                 )
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    workerList[index]?.name?.let {
+                                        Text(
+                                            text = "Name: $it",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                    workerList[index]?.age?.let {
+                                        Text(
+                                            text = "Age: $it",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                Row(
+                                    horizontalArrangement = Arrangement.End,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp)
+                                ) {
+                                    RatingBar(
+                                        rating = 4f,
+                                        imageVectorEmpty = ImageVector.vectorResource(id = R.drawable.star),
+                                        imageVectorFFilled = ImageVector.vectorResource(id = R.drawable.star_full),
+                                        itemSize = 20.dp,
+                                        animationEnabled = false,
+                                        gestureEnabled = false
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "No Workers Available\nTry Again Later",
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
+            } else {
+                loading = false
+                Column(
+                    modifier = Modifier
+                        .padding(it)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "No Workers Available\nTry Again Later",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     })
