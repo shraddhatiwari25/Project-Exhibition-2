@@ -1,7 +1,10 @@
 package com.project.aiohelp
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -16,6 +19,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -71,7 +75,7 @@ fun Setup(navController: NavController) {
 
 @Composable
 fun WorkerForm(navController: NavController) {
-    val dbManipulation = DBManipulation()
+    val dbManipulation = remember { DBManipulation() }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
@@ -88,6 +92,7 @@ fun WorkerForm(navController: NavController) {
     Column(
         Modifier
             .fillMaxSize()
+            .scrollable(rememberScrollState(), Orientation.Vertical)
             .padding(10.dp, 50.dp), verticalArrangement = Arrangement.Top
     ) {
         Row(
@@ -145,7 +150,8 @@ fun WorkerForm(navController: NavController) {
                 )
             }, keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
-            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            ), visualTransformation = PasswordVisualTransformation(),
+                singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
         Row(
@@ -162,7 +168,7 @@ fun WorkerForm(navController: NavController) {
                     Icon(icon, "Open menu", Modifier.clickable { expanded = !expanded })
                 },
                 readOnly = true,
-                )
+            )
             DropdownMenu(modifier = Modifier
                 .width(with(LocalDensity.current) { dropDownWidth.toDp() }),
                 expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -174,35 +180,35 @@ fun WorkerForm(navController: NavController) {
                 }
             }
         }
-    }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        Button(
-            onClick = {
-                if (name.isNotEmpty() and email.isNotEmpty() and age.isNotEmpty() and pass.isNotEmpty() and selectedItem.isNotEmpty()) {
-                    dbManipulation.addWorker(
-                        name.trim(), age.trim(), email.trim(), pass, selectedItem.trim()
-                    )
-                    navController.popBackStack("SetupScreen", true)
-                    navController.navigate(Screen.UserMain.route)
-                }
-            },
-            contentPadding = PaddingValues(15.dp, 10.dp),
-            shape = RoundedCornerShape(30.dp),
-            modifier = Modifier.padding(25.dp, 60.dp)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.End
         ) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = "Submit",
-                modifier = Modifier.size(25.dp)
-            )
-            Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
-        }
+            Button(
+                onClick = {
+                    if (name.isNotEmpty() and email.isNotEmpty() and age.isNotEmpty() and pass.isNotEmpty() and selectedItem.isNotEmpty()) {
+                        dbManipulation.addWorker(
+                            name.trim(), age.trim(), email.trim(), pass, selectedItem.trim()
+                        )
+                        navController.popBackStack("SetupScreen", true)
+                        navController.navigate(Screen.UserMain.route)
+                    }
+                },
+                contentPadding = PaddingValues(15.dp, 10.dp),
+                shape = RoundedCornerShape(30.dp),
+                modifier = Modifier.padding(end = 25.dp, top = 60.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = "Submit",
+                    modifier = Modifier.size(25.dp)
+                )
+                Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
+            }
 
+        }
     }
 }
 
@@ -279,7 +285,8 @@ fun UserForm(navController: NavController) {
             }, keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 capitalization = KeyboardCapitalization.None
-            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            ), visualTransformation = PasswordVisualTransformation(),
+                singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
     }
