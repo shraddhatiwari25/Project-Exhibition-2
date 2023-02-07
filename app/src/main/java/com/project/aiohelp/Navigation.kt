@@ -6,11 +6,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.SetupScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.UserMain.route) {
         composable(route = Screen.SetupScreen.route) {
             Setup(navController = navController)
         }
@@ -29,6 +31,22 @@ fun Navigation() {
         })) { entry ->
             entry.arguments?.getString("job")
                 ?.let { WorkerList(navController = navController, job = it) }
+        }
+        composable(
+            route = Screen.WorkerInfo.route + "/{name}/{age}/{email}/{rating}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+                navArgument("age") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType }
+            )
+        ) { entry ->
+            WorkerInfo(
+                navController = navController,
+                name = entry.arguments?.getString("name"),
+                age = entry.arguments?.getString("age"),
+                phoneNo = entry.arguments?.getString("email"),
+                rating = entry.arguments?.getString("rating"),
+            )
         }
     }
 }

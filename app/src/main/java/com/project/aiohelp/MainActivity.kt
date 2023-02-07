@@ -3,29 +3,33 @@ package com.project.aiohelp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -234,7 +238,7 @@ fun UserMain(navController: NavController) {
 
 @Composable
 fun WorkerList(navController: NavController, job: String) {
-    var loading by remember { mutableStateOf(true) }
+    var loading by rememberSaveable { mutableStateOf(true) }
     val dbManipulation = remember { DBManipulation() }
     val workerList = remember { dbManipulation.getWorker(job) }
     LaunchedEffect(key1 = true) {
@@ -270,6 +274,7 @@ fun WorkerList(navController: NavController, job: String) {
             if (!workerList.isEmpty()) {
                 loading = false
                 LazyColumn(
+                    state = rememberLazyListState(),
                     verticalArrangement = Arrangement.Top,
                     modifier = Modifier
                         .padding(it)
@@ -280,7 +285,16 @@ fun WorkerList(navController: NavController, job: String) {
                             shape = RectangleShape,
                             modifier = Modifier
                                 .height(72.dp)
-                                .clickable { /* TODO */ },
+                                .clickable {
+                                    navController.navigate(
+                                        Screen.WorkerInfo.withArgs(
+                                            workerList[index]?.name.toString(),
+                                            workerList[index]?.age.toString(),
+                                            workerList[index]?.email.toString(),
+                                            "3.5"
+                                        )
+                                    )
+                                },
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Row(
@@ -353,3 +367,157 @@ fun WorkerList(navController: NavController, job: String) {
     })
 }
 
+
+@Composable
+fun WorkerInfo(
+    navController: NavController,
+    name: String?,
+    age: String?,
+    phoneNo: String?,
+    rating: String?
+) {
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(text = "Worker Info") },
+            navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        )
+    }, content = {
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 30.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Top
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Profile Photo",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .border(8.dp, MaterialTheme.colorScheme.secondary, CircleShape)
+                        .size(180.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = name!!,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .align(Alignment.CenterHorizontally),
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 10.dp)
+                ) {
+                    Text(
+                        text = rating!!,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.star_full),
+                        contentDescription = "Star",
+                        modifier = Modifier
+                            .size(35.dp)
+                            .padding(start = 10.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .fillMaxWidth(), Arrangement.SpaceEvenly
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .padding(start = 0.dp, top = 80.dp)
+                            .size(120.dp),
+                        elevation = CardDefaults.cardElevation(5.dp)
+                    ) {
+                        SelectionContainer {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Text(
+                                    text = "Age",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier
+                                        .weight(2f)
+                                        .padding(top = 10.dp)
+                                )
+                                Text(
+                                    text = age!!,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    modifier = Modifier.weight(4f)
+                                )
+                            }
+                        }
+                    }
+                    Card(
+                        modifier = Modifier
+                            .padding(start = 0.dp, top = 80.dp)
+                            .size(120.dp),
+                        elevation = CardDefaults.cardElevation(5.dp)
+                    ) {
+                        SelectionContainer {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Text(
+                                    text = "Number",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier
+                                        .weight(2f)
+                                        .padding(top = 10.dp)
+                                )
+                                Text(
+                                    text = phoneNo!!,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    modifier = Modifier.weight(4f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Button(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .height(70.dp),
+                shape = RoundedCornerShape(
+                    topStart = 40.dp,
+                    topEnd = 40.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp
+                )
+            ) {
+                Text(
+                    text = "Hire",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    })
+}
