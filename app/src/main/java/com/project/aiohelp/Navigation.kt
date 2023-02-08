@@ -23,10 +23,13 @@ fun Navigation() {
         composable(route = Screen.UserMain.route) {
             UserMain(navController = navController)
         }
-        composable(route = Screen.WorkerList.route + "/{job}", arguments = listOf(navArgument("job") {
-            type = NavType.StringType
-            nullable = false
-        })) { entry ->
+        composable(
+            route = Screen.WorkerList.route + "/{job}",
+            arguments = listOf(navArgument("job") {
+                type = NavType.StringType
+                nullable = false
+            })
+        ) { entry ->
             entry.arguments?.getString("job")
                 ?.let { WorkerList(navController = navController, job = it) }
         }
@@ -46,8 +49,11 @@ fun Navigation() {
                 rating = entry.arguments?.getString("rating"),
             )
         }
-        composable(route = Screen.BookingPage.route) {
-            BookingPage(navController = navController)
+        composable(
+            route = Screen.BookingPage.route + "/{name}",
+            arguments = listOf(navArgument("name") { type = NavType.StringType })
+        ) {entry ->
+            BookingPage(navController = navController, entry.arguments?.getString("name"))
         }
     }
 }

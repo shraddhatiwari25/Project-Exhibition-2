@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.project.aiohelp.ui.theme.AIOHelpTheme
 import com.smarttoolfactory.ratingbar.RatingBar
@@ -510,7 +511,7 @@ fun WorkerInfo(
                 }
             }
             Button(
-                onClick = { navController.navigate(Screen.BookingPage.route) },
+                onClick = { navController.navigate(Screen.BookingPage.route + "/$name") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
@@ -534,13 +535,14 @@ fun WorkerInfo(
 
 
 @Composable
-fun BookingPage(navController: NavController) {
+fun BookingPage(navController: NavController, workerName: String?) {
     var address by remember { mutableStateOf("") }
     var cardNo by remember { mutableStateOf("") }
     var expDate by remember { mutableStateOf("") }
     var cvv by remember { mutableStateOf("") }
     var upi by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var dialogOpen by remember { mutableStateOf(false) }
     val radioOptions = listOf("Cash", "Debit Card", "Credit Card", "UPI")
     val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
     Scaffold(topBar = {
@@ -689,8 +691,7 @@ fun BookingPage(navController: NavController) {
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
-                    }
-                    else if (selectedOption == "UPI") {
+                    } else if (selectedOption == "UPI") {
                         Spacer(modifier = Modifier.height(80.dp))
                         Text(
                             text = "Enter UPI Information",
@@ -713,9 +714,13 @@ fun BookingPage(navController: NavController) {
                         )
                     }
                 }
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 50.dp), horizontalArrangement = Arrangement.End) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 50.dp), horizontalArrangement = Arrangement.End
+                ) {
                     Button(
-                        onClick = { /* TODO */ },
+                        onClick = { dialogOpen = true },
                         contentPadding = PaddingValues(15.dp, 10.dp),
                         shape = RoundedCornerShape(30.dp)
                     ) {
@@ -731,7 +736,55 @@ fun BookingPage(navController: NavController) {
                         )
                     }
                 }
-
+                if (dialogOpen) {
+                    Dialog( onDismissRequest = { } ) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            shadowElevation = 6.dp,
+                            color = MaterialTheme.colorScheme.surface
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(20.dp)
+                                    .fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Hired Successfully!",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Divider(
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Text(
+                                    text = "$workerName will arrive at your place, shortly.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(30.dp))
+                                Button(onClick = {
+                                    navController.popBackStack(
+                                        Screen.UserMain.route,
+                                        false
+                                    )
+                                }) {
+                                    Text(
+                                        text = "Go back",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     })
