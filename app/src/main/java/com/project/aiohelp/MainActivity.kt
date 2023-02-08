@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
@@ -30,6 +33,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -100,7 +105,8 @@ fun UserMain(navController: NavController) {
                         .align(Alignment.CenterVertically)
                         .fillMaxWidth(),
                     style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -132,7 +138,8 @@ fun UserMain(navController: NavController) {
                         .align(Alignment.CenterVertically)
                         .fillMaxWidth(),
                     style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -164,7 +171,8 @@ fun UserMain(navController: NavController) {
                         .align(Alignment.CenterVertically)
                         .fillMaxWidth(),
                     style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -196,7 +204,8 @@ fun UserMain(navController: NavController) {
                         .align(Alignment.CenterVertically)
                         .fillMaxWidth(),
                     style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -228,7 +237,8 @@ fun UserMain(navController: NavController) {
                         .align(Alignment.CenterVertically)
                         .fillMaxWidth(),
                     style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -500,7 +510,7 @@ fun WorkerInfo(
                 }
             }
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(Screen.BookingPage.route) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
@@ -517,6 +527,211 @@ fun WorkerInfo(
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold
                 )
+            }
+        }
+    })
+}
+
+
+@Composable
+fun BookingPage(navController: NavController) {
+    var address by remember { mutableStateOf("") }
+    var cardNo by remember { mutableStateOf("") }
+    var expDate by remember { mutableStateOf("") }
+    var cvv by remember { mutableStateOf("") }
+    var upi by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    val radioOptions = listOf("Cash", "Debit Card", "Credit Card", "UPI")
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(text = "Fill your details") },
+            navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        )
+    }, content = {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(it), verticalArrangement = Arrangement.Top
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 40.dp)
+            ) {
+                Text(
+                    text = "Customer Details",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+                OutlinedTextField(value = address, onValueChange = { address = it }, label = {
+                    Text(
+                        text = "Address"
+                    )
+                }, keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Words
+                ), singleLine = true, modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(80.dp))
+                Text(
+                    text = "Payment Method",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
+                radioOptions.forEach { text ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (text == selectedOption),
+                                    onClick = { onOptionSelected(text) }
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (text == selectedOption),
+                                modifier = Modifier.padding(8.dp),
+                                onClick = { onOptionSelected(text) }
+                            )
+                            Text(
+                                text = text,
+                                modifier = Modifier.padding(start = 10.dp),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
+                }
+                if (selectedOption != "Cash") {
+                    if (selectedOption == "Debit Card" || selectedOption == "Credit Card") {
+                        Spacer(modifier = Modifier.height(80.dp))
+                        Text(
+                            text = "Enter $selectedOption Information",
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(bottom = 10.dp)
+                        )
+                        OutlinedTextField(
+                            value = cardNo,
+                            onValueChange = { cardNo = it },
+                            label = {
+                                Text(
+                                    text = "$selectedOption Number"
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                capitalization = KeyboardCapitalization.Words
+                            ),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = expDate,
+                                onValueChange = { expDate = it },
+                                label = {
+                                    Text(
+                                        text = "Expiration Date"
+                                    )
+                                },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text
+                                ),
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 10.dp)
+                                    .weight(4f)
+                            )
+                            OutlinedTextField(
+                                value = cvv,
+                                onValueChange = { cvv = it },
+                                label = {
+                                    Text(
+                                        text = "CVV"
+                                    )
+                                },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.NumberPassword
+                                ),
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                            )
+                        }
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = {
+                                Text(
+                                    text = "Name on Card"
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                capitalization = KeyboardCapitalization.Words
+                            ),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    else if (selectedOption == "UPI") {
+                        Spacer(modifier = Modifier.height(80.dp))
+                        Text(
+                            text = "Enter UPI Information",
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(bottom = 10.dp)
+                        )
+                        OutlinedTextField(
+                            value = upi,
+                            onValueChange = { upi = it },
+                            label = {
+                                Text(
+                                    text = "Enter UPI ID"
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email
+                            ),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 50.dp), horizontalArrangement = Arrangement.End) {
+                    Button(
+                        onClick = { /* TODO */ },
+                        contentPadding = PaddingValues(15.dp, 10.dp),
+                        shape = RoundedCornerShape(30.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = "Submit",
+                            modifier = Modifier.size(25.dp)
+                        )
+                        Text(
+                            text = "Hire",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(horizontal = 10.dp)
+                        )
+                    }
+                }
+
             }
         }
     })

@@ -207,7 +207,6 @@ fun WorkerForm(navController: NavController) {
                 )
                 Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
             }
-
         }
     }
 }

@@ -6,8 +6,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @Composable
 fun Navigation() {
@@ -47,6 +45,9 @@ fun Navigation() {
                 phoneNo = entry.arguments?.getString("email"),
                 rating = entry.arguments?.getString("rating"),
             )
+        }
+        composable(route = Screen.BookingPage.route) {
+            BookingPage(navController = navController)
         }
     }
 }
