@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     object WorkerList : Screen("WorkerList")
     object WorkerInfo : Screen("WorkerInfo")
     object BookingPage : Screen("BookingPage")
+    object OrdersPage : Screen("OrdersPage")
     fun withArgs(vararg args: String): String {
         return buildString {
             append(route)

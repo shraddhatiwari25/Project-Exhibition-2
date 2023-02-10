@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -62,6 +64,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun UserMain(navController: NavController) {
+    val context = LocalContext.current
+    val dataStore = remember { StoreUserEmail(context) }
+    val userEmail = dataStore.getEmail.collectAsState(initial = "")
     TopAppBar(title = { Text(text = "AIO App") }, navigationIcon = {
         IconButton(onClick = { navController.navigate(Screen.UserMain.route) }) {
             Icon(Icons.Filled.Home, contentDescription = "Home Button")
@@ -70,8 +75,19 @@ fun UserMain(navController: NavController) {
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-        )
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        actions = {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { navController.navigate(Screen.OrdersPage.route + "/${userEmail.value}") }) {
+                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Orders Page")
+                }
+            }
+        }
     )
     Column(
         verticalArrangement = Arrangement.Top, modifier = Modifier
@@ -249,12 +265,15 @@ fun UserMain(navController: NavController) {
 
 @Composable
 fun WorkerList(navController: NavController, job: String) {
+    val context = LocalContext.current
+    val dataStore = remember { StoreJobType(context) }
     var loading by rememberSaveable { mutableStateOf(true) }
     val dbManipulation = remember { DBManipulation() }
     val workerList = remember { dbManipulation.getWorker(job) }
     LaunchedEffect(key1 = true) {
         delay(1000)
         loading = false
+        dataStore.saveJobType(job)
     }
     Scaffold(topBar = {
         TopAppBar(
@@ -302,6 +321,7 @@ fun WorkerList(navController: NavController, job: String) {
                                             workerList[index]?.name.toString(),
                                             workerList[index]?.age.toString(),
                                             workerList[index]?.email.toString(),
+                                            workerList[index]?.phNo.toString(),
                                             "3.5"
                                         )
                                     )
@@ -384,6 +404,7 @@ fun WorkerInfo(
     navController: NavController,
     name: String?,
     age: String?,
+    email: String?,
     phoneNo: String?,
     rating: String?
 ) {
@@ -511,7 +532,7 @@ fun WorkerInfo(
                 }
             }
             Button(
-                onClick = { navController.navigate(Screen.BookingPage.route + "/$name") },
+                onClick = { navController.navigate(Screen.BookingPage.route + "/$name" + "/$email") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
@@ -535,7 +556,13 @@ fun WorkerInfo(
 
 
 @Composable
-fun BookingPage(navController: NavController, workerName: String?) {
+fun BookingPage(navController: NavController, workerName: String?, workerEmail: String?) {
+    val context = LocalContext.current
+    val dataStoreEmail = remember { StoreUserEmail(context) }
+    val dataStoreJobType = remember { StoreJobType(context) }
+    val userEmail = dataStoreEmail.getEmail.collectAsState(initial = "")
+    val jobType = dataStoreJobType.getJobType.collectAsState(initial = "")
+    val dbManipulation = remember { DBManipulation() }
     var address by remember { mutableStateOf("") }
     var cardNo by remember { mutableStateOf("") }
     var expDate by remember { mutableStateOf("") }
@@ -628,7 +655,7 @@ fun BookingPage(navController: NavController, workerName: String?) {
                         )
                         OutlinedTextField(
                             value = cardNo,
-                            onValueChange = { cardNo = it },
+                            onValueChange = { if (it.length <= 16) cardNo = it },
                             label = {
                                 Text(
                                     text = "$selectedOption Number"
@@ -661,7 +688,7 @@ fun BookingPage(navController: NavController, workerName: String?) {
                             )
                             OutlinedTextField(
                                 value = cvv,
-                                onValueChange = { cvv = it },
+                                onValueChange = { if (it.length <= 3) cvv = it },
                                 label = {
                                     Text(
                                         text = "CVV"
@@ -720,7 +747,17 @@ fun BookingPage(navController: NavController, workerName: String?) {
                         .padding(top = 50.dp), horizontalArrangement = Arrangement.End
                 ) {
                     Button(
-                        onClick = { dialogOpen = true },
+                        onClick = {
+                            dbManipulation.placeOrder(
+                                userEmail.value!!,
+                                workerName!!,
+                                workerEmail!!,
+                                address,
+                                selectedOption,
+                                jobType.value!!
+                            )
+                            dialogOpen = true
+                        },
                         contentPadding = PaddingValues(15.dp, 10.dp),
                         shape = RoundedCornerShape(30.dp)
                     ) {
@@ -737,7 +774,7 @@ fun BookingPage(navController: NavController, workerName: String?) {
                     }
                 }
                 if (dialogOpen) {
-                    Dialog( onDismissRequest = { } ) {
+                    Dialog(onDismissRequest = { }) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
                             shadowElevation = 6.dp,
@@ -780,6 +817,166 @@ fun BookingPage(navController: NavController, workerName: String?) {
                                         color = MaterialTheme.colorScheme.onPrimary,
                                         textAlign = TextAlign.Center
                                     )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+}
+
+
+@Composable
+fun OrdersPage(navController: NavController, userEmail: String?) {
+    var loading by rememberSaveable { mutableStateOf(true) }
+    val dbManipulation = remember { DBManipulation() }
+    val orderList = remember { dbManipulation.getOrder(userEmail!!) }
+    LaunchedEffect(key1 = true) {
+        delay(1000)
+        loading = false
+    }
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(text = "Workers Hired") },
+            navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        )
+    }, content = {
+        if (loading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            if (!orderList.isEmpty()) {
+                loading = false
+                Column(Modifier.padding(it)) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .padding(start = 15.dp, end = 15.dp, top = 25.dp, bottom = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "In Progress", style = MaterialTheme.typography.titleLarge)
+                        Divider(
+                            thickness = 2.dp,
+                            modifier = Modifier.padding(start = 10.dp, top = 5.dp)
+                        )
+                    }
+                    LazyColumn(
+                        state = rememberLazyListState(),
+                        verticalArrangement = Arrangement.Top,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        itemsIndexed(orderList) { index, _ ->
+                            if (!orderList[index]?.completed!!) {
+                                Card(
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 5.dp, horizontal = 15.dp),
+                                    elevation = CardDefaults.cardElevation(2.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(20.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.Start
+                                        ) {
+                                            Text(
+                                                text = orderList[index]?.workerName!!,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = orderList[index]?.jobType!!,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                        Text(
+                                            text = orderList[index]?.date!!,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = 15.dp, end = 15.dp, top = 25.dp, bottom = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Completed", style = MaterialTheme.typography.titleLarge)
+                        Divider(
+                            thickness = 2.dp,
+                            modifier = Modifier.padding(start = 10.dp, top = 2.dp)
+                        )
+                    }
+                    LazyColumn(
+                        state = rememberLazyListState(),
+                        verticalArrangement = Arrangement.Top,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        itemsIndexed(orderList) { index, _ ->
+                            if (orderList[index]?.completed!!) {
+                                Card(
+                                    shape = RoundedCornerShape(10.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 5.dp, horizontal = 15.dp),
+                                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.inverseOnSurface)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(20.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.Start
+                                        ) {
+                                            Text(
+                                                text = orderList[index]?.workerName!!,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = orderList[index]?.jobType!!,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                        Text(
+                                            text = orderList[index]?.date!!,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
                                 }
                             }
                         }

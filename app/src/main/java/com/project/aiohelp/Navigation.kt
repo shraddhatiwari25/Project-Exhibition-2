@@ -34,26 +34,40 @@ fun Navigation() {
                 ?.let { WorkerList(navController = navController, job = it) }
         }
         composable(
-            route = Screen.WorkerInfo.route + "/{name}/{age}/{email}/{rating}",
+            route = Screen.WorkerInfo.route + "/{name}/{age}/{email}/{phNo}/{rating}",
             arguments = listOf(
                 navArgument("name") { type = NavType.StringType },
                 navArgument("age") { type = NavType.StringType },
-                navArgument("email") { type = NavType.StringType }
+                navArgument("email") { type = NavType.StringType },
+                navArgument("phNo") { type = NavType.StringType }
             )
         ) { entry ->
             WorkerInfo(
                 navController = navController,
                 name = entry.arguments?.getString("name"),
                 age = entry.arguments?.getString("age"),
-                phoneNo = entry.arguments?.getString("email"),
+                email = entry.arguments?.getString("email"),
+                phoneNo = entry.arguments?.getString("phNo"),
                 rating = entry.arguments?.getString("rating"),
             )
         }
         composable(
-            route = Screen.BookingPage.route + "/{name}",
-            arguments = listOf(navArgument("name") { type = NavType.StringType })
+            route = Screen.BookingPage.route + "/{name}/{email}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType })
+        ) { entry ->
+            BookingPage(
+                navController = navController,
+                entry.arguments?.getString("name"),
+                entry.arguments?.getString("email")
+            )
+        }
+        composable(
+            route = Screen.OrdersPage.route + "/{userEmail}",
+            arguments = listOf(navArgument("userEmail") { type = NavType.StringType })
         ) {entry ->
-            BookingPage(navController = navController, entry.arguments?.getString("name"))
+            OrdersPage(navController = navController, entry.arguments?.getString("userEmail"))
         }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 
 @Composable
 fun Setup(navController: NavController) {
@@ -80,6 +82,7 @@ fun WorkerForm(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
+    var phNo by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf("") }
     var dropDownWidth by remember { mutableStateOf(0) }
@@ -126,6 +129,18 @@ fun WorkerForm(navController: NavController) {
                 )
             }, keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
+            ), singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(10.dp)
+        ) {
+            OutlinedTextField(value = phNo, onValueChange = { if (it.length <= 10) phNo = it }, label = {
+                Text(
+                    text = "Phone Number"
+                )
+            }, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone
             ), singleLine = true, modifier = Modifier.fillMaxWidth()
             )
         }
@@ -188,9 +203,9 @@ fun WorkerForm(navController: NavController) {
         ) {
             Button(
                 onClick = {
-                    if (name.isNotEmpty() and email.isNotEmpty() and age.isNotEmpty() and pass.isNotEmpty() and selectedItem.isNotEmpty()) {
+                    if (name.isNotEmpty() and email.isNotEmpty() and age.isNotEmpty() and phNo.isNotEmpty() and pass.isNotEmpty() and selectedItem.isNotEmpty()) {
                         dbManipulation.addWorker(
-                            name.trim(), age.trim(), email.trim(), pass, selectedItem.trim()
+                            name.trim(), age.trim(), phNo.trim(), email.trim(), pass, selectedItem.trim()
                         )
                         navController.popBackStack("SetupScreen", true)
                         navController.navigate(Screen.UserMain.route)
@@ -213,6 +228,9 @@ fun WorkerForm(navController: NavController) {
 
 @Composable
 fun UserForm(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = remember { StoreUserEmail(context) }
     val dbManipulation = DBManipulation()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -299,6 +317,9 @@ fun UserForm(navController: NavController) {
                 if (name.isNotEmpty() and email.isNotEmpty() and password.isNotEmpty()) {
                     dbManipulation.addCustomer(name.trim(), email.trim(), password.trim())
                     navController.popBackStack("SetupScreen", true)
+                    scope.launch {
+                        dataStore.saveEmail(email)
+                    }
                     navController.navigate(Screen.UserMain.route)
                 } else error = true
 
