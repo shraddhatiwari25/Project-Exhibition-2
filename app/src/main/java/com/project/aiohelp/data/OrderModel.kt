@@ -1,8 +1,7 @@
 package com.project.aiohelp.data
 
-import com.google.firebase.Timestamp
-
 data class OrderModel(
+    var userName: String? = null,
     var userEmail: String? = null,
     var workerName: String? = null,
     var workerEmail: String? = null,

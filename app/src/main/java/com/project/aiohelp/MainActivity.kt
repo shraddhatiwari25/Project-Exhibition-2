@@ -15,12 +15,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,6 +48,7 @@ import androidx.navigation.NavController
 import com.project.aiohelp.ui.theme.AIOHelpTheme
 import com.smarttoolfactory.ratingbar.RatingBar
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -559,8 +564,10 @@ fun WorkerInfo(
 fun BookingPage(navController: NavController, workerName: String?, workerEmail: String?) {
     val context = LocalContext.current
     val dataStoreEmail = remember { StoreUserEmail(context) }
+    val dataStoreUserName = remember { StoreUserName(context) }
     val dataStoreJobType = remember { StoreJobType(context) }
     val userEmail = dataStoreEmail.getEmail.collectAsState(initial = "")
+    val userName = dataStoreUserName.getName.collectAsState(initial = "")
     val jobType = dataStoreJobType.getJobType.collectAsState(initial = "")
     val dbManipulation = remember { DBManipulation() }
     var address by remember { mutableStateOf("") }
@@ -749,6 +756,7 @@ fun BookingPage(navController: NavController, workerName: String?, workerEmail: 
                     Button(
                         onClick = {
                             dbManipulation.placeOrder(
+                                userName.value!!,
                                 userEmail.value!!,
                                 workerName!!,
                                 workerEmail!!,
@@ -981,6 +989,231 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                             }
                         }
                     }
+                }
+            }
+        }
+    })
+}
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun WorkerMain(navController: NavController) {
+    val context = LocalContext.current
+    val dataStoreEmail = remember { StoreWorkerEmail(context) }
+    val workerEmail = dataStoreEmail.getEmail.collectAsState(initial = "")
+    val dbManipulation = remember { DBManipulation() }
+    val loading = dbManipulation.loading.value
+    val success = dbManipulation.success.value
+    var orderList = dbManipulation.getOrderWorker(workerEmail.value!!)
+    val refreshScope = rememberCoroutineScope()
+    var refreshing by remember { mutableStateOf(false) }
+
+    fun refresh() = refreshScope.launch {
+        refreshing = true
+        orderList = dbManipulation.getOrderWorker(workerEmail.value!!)
+        delay(1000)
+        refreshing = false
+    }
+    val state = rememberPullRefreshState(refreshing, ::refresh)
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text(text = "Available Jobs") },
+            navigationIcon = {
+                IconButton(onClick = { }) {
+                    Icon(Icons.Filled.Home, contentDescription = "Home")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        )
+    }, content = {
+        if (loading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            if (success) {
+                Box(modifier = Modifier
+                    .padding(it)
+                    .pullRefresh(state)) {
+                    Column {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 15.dp, end = 15.dp, top = 25.dp, bottom = 15.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "In Progress", style = MaterialTheme.typography.titleLarge)
+                            Divider(
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(start = 10.dp, top = 5.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        LazyColumn(
+                            state = rememberLazyListState(),
+                            verticalArrangement = Arrangement.Top,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            itemsIndexed(orderList) { index, _ ->
+                                if (!orderList[index]?.completed!!) {
+                                    Card(
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 5.dp, horizontal = 15.dp),
+                                        elevation = CardDefaults.cardElevation(2.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(20.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Column(
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(
+                                                    text = orderList[index]?.userName!!,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = orderList[index]?.address!!,
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                            Text(
+                                                text = orderList[index]?.date!!,
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                        }
+                                        Divider(
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.End
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = { /*TODO*/ },
+                                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface),
+                                                modifier = Modifier.padding(end = 15.dp)
+                                            ) {
+                                                Text(
+                                                    text = "Cancel",
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                            Button(
+                                                onClick = { /*TODO*/ },
+                                                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                                                modifier = Modifier.padding(end = 7.dp)
+                                            ) {
+                                                Text(
+                                                    text = "Mark as Completed",
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(start = 15.dp, end = 15.dp, top = 25.dp, bottom = 15.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "Completed", style = MaterialTheme.typography.titleLarge)
+                            Divider(
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(start = 10.dp, top = 2.dp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        LazyColumn(
+                            state = rememberLazyListState(),
+                            verticalArrangement = Arrangement.Top,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            itemsIndexed(orderList) { index, _ ->
+                                if (orderList[index]?.completed!!) {
+                                    Card(
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 5.dp, horizontal = 15.dp),
+                                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.inverseOnSurface)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(20.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Column(
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.Start
+                                            ) {
+                                                Text(
+                                                    text = orderList[index]?.userName!!,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = orderList[index]?.address!!,
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                            Text(
+                                                text = orderList[index]?.date!!,
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .padding(it)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "No Jobs Available\nTry Again Later",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

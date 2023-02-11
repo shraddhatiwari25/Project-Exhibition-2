@@ -3,6 +3,7 @@ package com.project.aiohelp
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+"karan.pandey@gmail.com"import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -20,6 +21,8 @@ import java.util.*
 
 class DBManipulation {
     private val db = Firebase.firestore
+    var loading = mutableStateOf(true)
+    var success = mutableStateOf(false)
 
     fun addCustomer(name: String, email: String, pass: String) {
         val user = hashMapOf(
@@ -52,6 +55,7 @@ class DBManipulation {
             "email" to email,
             "pass" to pass,
             "job" to job,
+            "rating" to 0f,
             "busy" to false
         )
         db.collection("Workers").document(email).set(worker)
@@ -78,6 +82,7 @@ class DBManipulation {
 
 
     fun placeOrder(
+        userName: String,
         userEmail: String,
         workerName: String,
         workerEmail: String,
@@ -90,7 +95,7 @@ class DBManipulation {
         val month = calendar.get(Calendar.MONTH) + 1
         val monthName = calendar.getDisplayName(month, Calendar.SHORT, Locale.US)
         val date = "$day $monthName"
-        val order = OrderModel(userEmail, workerName, workerEmail, false, address, paymentMethod, jobType, date)
+        val order = OrderModel(userName, userEmail, workerName, workerEmail, false, address, paymentMethod, jobType, date)
 
         db.collection("Workers").document(workerEmail).update("busy", true)
         db.collection("Orders").add(order)
@@ -98,7 +103,6 @@ class DBManipulation {
 
     fun getOrder(userEmail: String) : SnapshotStateList<OrderModel?> {
         val orderList = mutableStateListOf<OrderModel?>()
-        Log.i("Order", userEmail)
         db.collection("Orders").whereEqualTo("userEmail", userEmail).get()
             .addOnSuccessListener { queryDocumentSnapshots ->
                 if (!queryDocumentSnapshots.isEmpty) {
@@ -108,6 +112,26 @@ class DBManipulation {
                         orderList.add(c)
                     }
                 }
+            }
+        return orderList
+    }
+
+    fun getOrderWorker(workerEmail: String) : SnapshotStateList<OrderModel?> {
+        val orderList = mutableStateListOf<OrderModel?>()
+        db.collection("Orders").whereEqualTo("workerEmail", workerEmail).get()
+            .addOnSuccessListener { queryDocumentSnapshots ->
+                if (!queryDocumentSnapshots.isEmpty) {
+                    val list = queryDocumentSnapshots.documents
+                    for (d in list) {
+                        val c: OrderModel? = d.toObject(OrderModel::class.java)
+                        orderList.add(c)
+                    }
+                    success.value = true
+                    loading.value = false
+                }
+            }.addOnFailureListener {
+                success.value = false
+                loading.value = false
             }
         return orderList
     }
@@ -124,9 +148,45 @@ class StoreUserEmail(private val context: Context) {
             preferences[USER_EMAIL_KEY] ?: ""
         }
 
-    suspend fun saveEmail(name: String) {
+    suspend fun saveEmail(email: String) {
         context.datastore.edit { preference ->
-            preference[USER_EMAIL_KEY] = name
+            preference[USER_EMAIL_KEY] = email
+        }
+    }
+}
+
+class StoreUserName(private val context: Context) {
+    companion object {
+        private val Context.datastore: DataStore<Preferences> by preferencesDataStore("UserName")
+        val USER_NAME_KEY = stringPreferencesKey("user_name")
+    }
+
+    val getName: Flow<String?> =
+        context.datastore.data.map { preferences ->
+            preferences[USER_NAME_KEY] ?: ""
+        }
+
+    suspend fun saveName(name: String) {
+        context.datastore.edit { preference ->
+            preference[USER_NAME_KEY] = name
+        }
+    }
+}
+
+class StoreWorkerEmail(private val context: Context) {
+    companion object {
+        private val Context.datastore: DataStore<Preferences> by preferencesDataStore("WorkerEmail")
+        val WORKER_EMAIL_KEY = stringPreferencesKey("worker_email")
+    }
+
+    val getEmail: Flow<String?> =
+        context.datastore.data.map { preferences ->
+            preferences[WORKER_EMAIL_KEY] ?: ""
+        }
+
+    suspend fun saveEmail(email: String) {
+        context.datastore.edit { preference ->
+            preference[WORKER_EMAIL_KEY] = email
         }
     }
 }

@@ -77,6 +77,9 @@ fun Setup(navController: NavController) {
 
 @Composable
 fun WorkerForm(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = remember { StoreWorkerEmail(context) }
     val dbManipulation = remember { DBManipulation() }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -207,8 +210,11 @@ fun WorkerForm(navController: NavController) {
                         dbManipulation.addWorker(
                             name.trim(), age.trim(), phNo.trim(), email.trim(), pass, selectedItem.trim()
                         )
+                        scope.launch {
+                            dataStore.saveEmail(email)
+                        }
                         navController.popBackStack("SetupScreen", true)
-                        navController.navigate(Screen.UserMain.route)
+                        navController.navigate(Screen.WorkerMain.route)
                     }
                 },
                 contentPadding = PaddingValues(15.dp, 10.dp),
@@ -231,6 +237,7 @@ fun UserForm(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = remember { StoreUserEmail(context) }
+    val dataStoreName = remember { StoreUserName(context) }
     val dbManipulation = DBManipulation()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -319,6 +326,7 @@ fun UserForm(navController: NavController) {
                     navController.popBackStack("SetupScreen", true)
                     scope.launch {
                         dataStore.saveEmail(email)
+                        dataStoreName.saveName(name)
                     }
                     navController.navigate(Screen.UserMain.route)
                 } else error = true

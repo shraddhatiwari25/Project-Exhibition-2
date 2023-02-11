@@ -69,5 +69,8 @@ fun Navigation() {
         ) {entry ->
             OrdersPage(navController = navController, entry.arguments?.getString("userEmail"))
         }
+        composable(route = Screen.WorkerMain.route) {
+            WorkerMain(navController = navController)
+        }
     }
 }
