@@ -3,7 +3,7 @@ package com.project.aiohelp
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
-"karan.pandey@gmail.com"import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -98,10 +98,10 @@ class DBManipulation {
         val order = OrderModel(userName, userEmail, workerName, workerEmail, false, address, paymentMethod, jobType, date)
 
         db.collection("Workers").document(workerEmail).update("busy", true)
-        db.collection("Orders").add(order)
+        db.collection("Orders").document("$userEmail$workerEmail$date").set(order)
     }
 
-    fun getOrder(userEmail: String) : SnapshotStateList<OrderModel?> {
+    fun getOrder(userEmail: String): SnapshotStateList<OrderModel?> {
         val orderList = mutableStateListOf<OrderModel?>()
         db.collection("Orders").whereEqualTo("userEmail", userEmail).get()
             .addOnSuccessListener { queryDocumentSnapshots ->
@@ -116,7 +116,7 @@ class DBManipulation {
         return orderList
     }
 
-    fun getOrderWorker(workerEmail: String) : SnapshotStateList<OrderModel?> {
+    fun getOrderWorker(workerEmail: String): SnapshotStateList<OrderModel?> {
         val orderList = mutableStateListOf<OrderModel?>()
         db.collection("Orders").whereEqualTo("workerEmail", workerEmail).get()
             .addOnSuccessListener { queryDocumentSnapshots ->
@@ -134,6 +134,10 @@ class DBManipulation {
                 loading.value = false
             }
         return orderList
+    }
+
+    fun completeOrder(workerEmail: String, userEmail: String, date: String) {
+        db.collection("Orders").document("$userEmail$workerEmail$date").update("completed", true)
     }
 }
 

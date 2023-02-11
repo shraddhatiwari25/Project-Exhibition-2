@@ -1043,9 +1043,11 @@ fun WorkerMain(navController: NavController) {
             }
         } else {
             if (success) {
-                Box(modifier = Modifier
-                    .padding(it)
-                    .pullRefresh(state)) {
+                Box(
+                    modifier = Modifier
+                        .padding(it)
+                        .pullRefresh(state)
+                ) {
                     Column {
                         Row(
                             Modifier
@@ -1103,7 +1105,11 @@ fun WorkerMain(navController: NavController) {
                                         }
                                         Divider(
                                             thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 10.dp),
+                                            modifier = Modifier.padding(
+                                                start = 20.dp,
+                                                end = 20.dp,
+                                                bottom = 10.dp
+                                            ),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Row(
@@ -1125,7 +1131,14 @@ fun WorkerMain(navController: NavController) {
                                                 )
                                             }
                                             Button(
-                                                onClick = { /*TODO*/ },
+                                                onClick = {
+                                                    dbManipulation.completeOrder(
+                                                        workerEmail.value!!,
+                                                        orderList[index]?.userEmail!!,
+                                                        orderList[index]?.date!!
+                                                    )
+                                                    refresh()
+                                                },
                                                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                                                 modifier = Modifier.padding(end = 7.dp)
                                             ) {
