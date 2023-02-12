@@ -272,12 +272,10 @@ fun UserMain(navController: NavController) {
 fun WorkerList(navController: NavController, job: String) {
     val context = LocalContext.current
     val dataStore = remember { StoreJobType(context) }
-    var loading by rememberSaveable { mutableStateOf(true) }
     val dbManipulation = remember { DBManipulation() }
+    var loading = dbManipulation.loading.value
     val workerList = remember { dbManipulation.getWorker(job) }
     LaunchedEffect(key1 = true) {
-        delay(1000)
-        loading = false
         dataStore.saveJobType(job)
     }
     Scaffold(topBar = {

@@ -73,6 +73,7 @@ class DBManipulation {
                         workerList.add(c)
                     }
                 }
+                loading.value = false
             }
             .addOnFailureListener {
                 // TODO
