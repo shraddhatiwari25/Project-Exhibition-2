@@ -27,7 +27,6 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -325,7 +324,7 @@ fun WorkerList(navController: NavController, job: String) {
                                             workerList[index]?.age.toString(),
                                             workerList[index]?.email.toString(),
                                             workerList[index]?.phNo.toString(),
-                                            "3.5"
+                                            workerList[index]?.ratings.toString()
                                         )
                                     )
                                 },
@@ -369,7 +368,7 @@ fun WorkerList(navController: NavController, job: String) {
                                         .padding(horizontal = 20.dp)
                                 ) {
                                     RatingBar(
-                                        rating = 4f,
+                                        rating = workerList[index]?.ratings!!,
                                         imageVectorEmpty = ImageVector.vectorResource(id = R.drawable.star),
                                         imageVectorFFilled = ImageVector.vectorResource(id = R.drawable.star_full),
                                         itemSize = 20.dp,
@@ -836,9 +835,12 @@ fun BookingPage(navController: NavController, workerName: String?, workerEmail: 
 
 @Composable
 fun OrdersPage(navController: NavController, userEmail: String?) {
-    var loading by rememberSaveable { mutableStateOf(true) }
     val dbManipulation = remember { DBManipulation() }
+    var loading = dbManipulation.loading.value
     val orderList = remember { dbManipulation.getOrder(userEmail!!) }
+    var dialogOpen by remember { mutableStateOf(false) }
+    var newRating = 0f
+    val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = true) {
         delay(1000)
         loading = false
@@ -991,7 +993,7 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                         horizontalArrangement = Arrangement.End
                                     ) {
                                         Button(
-                                            onClick = {  },
+                                            onClick = { dialogOpen = true },
                                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                                             modifier = Modifier.padding(end = 7.dp)
                                         ) {
@@ -1000,6 +1002,59 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.onPrimary
                                             )
+                                        }
+                                    }
+                                }
+                                if (dialogOpen) {
+                                    Dialog(onDismissRequest = { dialogOpen = false }) {
+                                        Surface(
+                                            shape = RoundedCornerShape(16.dp),
+                                            shadowElevation = 6.dp,
+                                            color = MaterialTheme.colorScheme.surface
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .padding(20.dp)
+                                                    .fillMaxWidth(),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = "Give rating",
+                                                    style = MaterialTheme.typography.headlineSmall,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(modifier = Modifier.height(10.dp))
+                                                Divider(
+                                                    thickness = 1.dp,
+                                                    color = MaterialTheme.colorScheme.outlineVariant
+                                                )
+                                                Spacer(modifier = Modifier.height(20.dp))
+                                                RatingBar(
+                                                    rating = 0f,
+                                                    imageVectorEmpty = ImageVector.vectorResource(id = R.drawable.star),
+                                                    imageVectorFFilled = ImageVector.vectorResource(id = R.drawable.star_full),
+                                                    itemSize = 50.dp,
+                                                    animationEnabled = false,
+                                                    gestureEnabled = true,
+                                                    onRatingChange = { newRating = it }
+                                                )
+                                                Spacer(modifier = Modifier.height(30.dp))
+                                                Button(onClick = {
+                                                    scope.launch {
+                                                        dbManipulation.rating(orderList[index]?.workerEmail!!, newRating)
+                                                    }
+                                                    dialogOpen = false
+                                                }) {
+                                                    Text(
+                                                        text = "Rate",
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        color = MaterialTheme.colorScheme.onPrimary,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -1232,18 +1287,24 @@ fun WorkerMain(navController: NavController) {
                     PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
                 }
             } else {
-                Column(
-                    modifier = Modifier
-                        .padding(it)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "No Jobs Available\nTry Again Later",
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center
-                    )
+                Box(modifier = Modifier
+                    .padding(it)
+                    .pullRefresh(state)) {
+                    Column(
+                        modifier = Modifier
+                            .padding(it)
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "No Jobs Available\nTry Again Later",
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
                 }
             }
         }

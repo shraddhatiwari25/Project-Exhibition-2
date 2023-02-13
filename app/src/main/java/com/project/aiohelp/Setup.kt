@@ -40,7 +40,7 @@ fun Setup(navController: NavController) {
             modifier = Modifier.padding(60.dp, 80.dp, 10.dp, 0.dp)
         ) {
             Text(
-                text = "Are you a \nCustomer \nor a \nWorker?",
+                text = "Create Account",
                 style = MaterialTheme.typography.displaySmall
             )
         }
@@ -80,6 +80,7 @@ fun WorkerForm(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = remember { StoreWorkerEmail(context) }
+    val dataStoreLogin = remember { LoginInfo(context) }
     val dbManipulation = remember { DBManipulation() }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -212,6 +213,7 @@ fun WorkerForm(navController: NavController) {
                         )
                         scope.launch {
                             dataStore.saveEmail(email)
+                            dataStoreLogin.saveLoginInfo("worker")
                         }
                         navController.popBackStack("SetupScreen", true)
                         navController.navigate(Screen.WorkerMain.route)
@@ -238,6 +240,7 @@ fun UserForm(navController: NavController) {
     val scope = rememberCoroutineScope()
     val dataStore = remember { StoreUserEmail(context) }
     val dataStoreName = remember { StoreUserName(context) }
+    val dataStoreLogin = remember { LoginInfo(context) }
     val dbManipulation = DBManipulation()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -327,6 +330,7 @@ fun UserForm(navController: NavController) {
                     scope.launch {
                         dataStore.saveEmail(email)
                         dataStoreName.saveName(name)
+                        dataStoreLogin.saveLoginInfo("customer")
                     }
                     navController.navigate(Screen.UserMain.route)
                 } else error = true
@@ -343,6 +347,5 @@ fun UserForm(navController: NavController) {
             )
             Text(text = "Submit", fontSize = 17.sp, modifier = Modifier.padding(10.dp, 0.dp))
         }
-
     }
 }

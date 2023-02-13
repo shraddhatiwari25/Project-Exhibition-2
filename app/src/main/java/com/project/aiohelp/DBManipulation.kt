@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -103,6 +104,7 @@ class DBManipulation {
                         val c: OrderModel? = d.toObject(OrderModel::class.java)
                         orderList.add(c)
                     }
+                    loading.value = false
                 }
             }
         return orderList
@@ -119,8 +121,8 @@ class DBManipulation {
                         orderList.add(c)
                     }
                     success.value = true
-                    loading.value = false
                 }
+                loading.value = false
             }.addOnFailureListener {
                 success.value = false
                 loading.value = false
@@ -217,6 +219,24 @@ class StoreJobType(private val context: Context) {
     suspend fun saveJobType(jobType: String) {
         context.datastore.edit { preference ->
             preference[JOB_TYPE] = jobType
+        }
+    }
+}
+
+class LoginInfo(private val context: Context) {
+    companion object {
+        private val Context.datastore: DataStore<Preferences> by preferencesDataStore("LoginInfo")
+        val LOGIN_INFO = stringPreferencesKey("login_info")
+    }
+
+    val getLoginInfo: Flow<String?> =
+        context.datastore.data.map { preferences ->
+            preferences[LOGIN_INFO] ?: "false"
+        }
+
+    suspend fun saveLoginInfo(login: String) {
+        context.datastore.edit { preference ->
+            preference[LOGIN_INFO] = login
         }
     }
 }

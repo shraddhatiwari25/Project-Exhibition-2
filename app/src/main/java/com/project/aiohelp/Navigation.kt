@@ -1,6 +1,11 @@
 package com.project.aiohelp
 
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
@@ -9,8 +14,15 @@ import androidx.navigation.navArgument
 
 @Composable
 fun Navigation() {
+    val context = LocalContext.current
+    val dataStoreLogin = remember { LoginInfo(context) }
+    val loginInfo = dataStoreLogin.getLoginInfo.collectAsState(initial = "")
+    Log.i("Login", loginInfo.value!!)
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.UserMain.route) {
+    var startDestination = Screen.UserMain.route
+    if (loginInfo.value == "false") startDestination = Screen.SetupScreen.route
+    else if (loginInfo.value == "worker") startDestination = Screen.WorkerMain.route
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(route = Screen.SetupScreen.route) {
             Setup(navController = navController)
         }
