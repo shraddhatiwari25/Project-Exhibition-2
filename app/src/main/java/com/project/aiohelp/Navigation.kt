@@ -64,7 +64,7 @@ fun Navigation() {
             )
         }
         composable(
-            route = Screen.BookingPage.route + "/{name}/{email}",
+            route = Screen.BookingPage.route + "/{name}/{email}/{phoneNo}",
             arguments = listOf(
                 navArgument("name") { type = NavType.StringType },
                 navArgument("email") { type = NavType.StringType })
@@ -72,7 +72,9 @@ fun Navigation() {
             BookingPage(
                 navController = navController,
                 entry.arguments?.getString("name"),
-                entry.arguments?.getString("email")
+                entry.arguments?.getString("email"),
+                entry.arguments?.getString("phoneNo")
+
             )
         }
         composable(

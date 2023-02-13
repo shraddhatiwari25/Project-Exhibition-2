@@ -17,10 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -68,202 +65,225 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun UserMain(navController: NavController) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val dataStore = remember { StoreUserEmail(context) }
+    val dataStoreWorker = remember { StoreWorkerEmail(context) }
+    val dataStoreJobType = StoreJobType(context)
+    val dataStoreLoginInfo = remember { LoginInfo(context) }
     val userEmail = dataStore.getEmail.collectAsState(initial = "")
-    TopAppBar(title = { Text(text = "AIO App") }, navigationIcon = {
-        IconButton(onClick = { navController.navigate(Screen.UserMain.route) }) {
-            Icon(Icons.Filled.Home, contentDescription = "Home Button")
-        }
-    },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        actions = {
-            Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
+        TopAppBar(title = { Text(text = "AIO App") }, navigationIcon = {
+            IconButton(onClick = { navController.navigate(Screen.UserMain.route) }) {
+                Icon(Icons.Filled.Home, contentDescription = "Home Button")
+            }
+        },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            actions = {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navController.navigate(Screen.OrdersPage.route + "/${userEmail.value}") }) {
+                        Icon(Icons.Filled.ShoppingCart, contentDescription = "Orders Page")
+                    }
+                    IconButton(onClick = {
+                        scope.launch {
+                            dataStore.saveEmail("")
+                            dataStoreWorker.saveEmail("")
+                            dataStoreJobType.saveJobType("")
+                            dataStoreLoginInfo.saveLoginInfo("false")
+                            snackbarHostState.showSnackbar("Logged Out")
+                        }
+                        navController.navigate(Screen.SetupScreen.route)
+                    }) {
+                        Icon(painter = painterResource(id = R.drawable.logout), contentDescription = "Logout", modifier = Modifier.size(30.dp))
+                    }
+                }
+            }
+        )
+    }, content = {
+        Column(Modifier.padding(it)) {
+            Column(
+                verticalArrangement = Arrangement.Top, modifier = Modifier
+                    .padding(20.dp, 30.dp)
+                    .scrollable(rememberScrollState(), Orientation.Vertical)
             ) {
-                IconButton(onClick = { navController.navigate(Screen.OrdersPage.route + "/${userEmail.value}") }) {
-                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Orders Page")
+
+                // Carpenter
+
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .padding(0.dp, 10.dp)
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clickable { navController.navigate(Screen.WorkerList.withArgs("Carpenter")) },
+                    elevation = CardDefaults.cardElevation(10.dp, 5.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.image1),
+                            contentDescription = stringResource(
+                                id = R.string.Image1
+                            ),
+                            alignment = Alignment.CenterStart,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.requiredWidth(110.dp)
+                        )
+                        Text(
+                            text = stringResource(id = R.string.Image1),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Plumber
+
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .padding(0.dp, 10.dp)
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clickable { navController.navigate(Screen.WorkerList.withArgs("Plumber")) },
+                    elevation = CardDefaults.cardElevation(10.dp, 5.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.image2),
+                            contentDescription = stringResource(
+                                id = R.string.Image2
+                            ),
+                            alignment = Alignment.CenterStart,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.requiredWidth(110.dp)
+                        )
+                        Text(
+                            text = stringResource(id = R.string.Image2),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Gardener
+
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .padding(0.dp, 10.dp)
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clickable { navController.navigate(Screen.WorkerList.withArgs("Gardener")) },
+                    elevation = CardDefaults.cardElevation(10.dp, 5.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.image3),
+                            contentDescription = stringResource(
+                                id = R.string.Image3
+                            ),
+                            alignment = Alignment.CenterStart,
+                            contentScale = ContentScale.FillWidth,
+                            modifier = Modifier.requiredWidth(110.dp)
+                        )
+                        Text(
+                            text = stringResource(id = R.string.Image3),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // House Cleaner
+
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .padding(0.dp, 10.dp)
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clickable { navController.navigate(Screen.WorkerList.withArgs("House Cleaner")) },
+                    elevation = CardDefaults.cardElevation(10.dp, 5.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.image4),
+                            contentDescription = stringResource(
+                                id = R.string.Image4
+                            ),
+                            alignment = Alignment.CenterStart,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.requiredWidth(110.dp)
+                        )
+                        Text(
+                            text = stringResource(id = R.string.Image4),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                // Laundry
+
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .padding(0.dp, 10.dp)
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clickable { navController.navigate(Screen.WorkerList.withArgs("Laundry")) },
+                    elevation = CardDefaults.cardElevation(10.dp, 5.dp)
+                ) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.image5),
+                            contentDescription = stringResource(
+                                id = R.string.Image5
+                            ),
+                            alignment = Alignment.CenterStart,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.requiredWidth(110.dp)
+                        )
+                        Text(
+                            text = stringResource(id = R.string.Image5),
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
-    )
-    Column(
-        verticalArrangement = Arrangement.Top, modifier = Modifier
-            .padding(20.dp, 80.dp)
-            .scrollable(rememberScrollState(), Orientation.Vertical)
-    ) {
-
-        // Carpenter
-
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .padding(0.dp, 10.dp)
-                .height(100.dp)
-                .fillMaxWidth()
-                .clickable { navController.navigate(Screen.WorkerList.withArgs("Carpenter")) },
-            elevation = CardDefaults.cardElevation(10.dp, 5.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.image1),
-                    contentDescription = stringResource(
-                        id = R.string.Image1
-                    ),
-                    alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.requiredWidth(110.dp)
-                )
-                Text(
-                    text = stringResource(id = R.string.Image1),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // Plumber
-
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .padding(0.dp, 10.dp)
-                .height(100.dp)
-                .fillMaxWidth()
-                .clickable { navController.navigate(Screen.WorkerList.withArgs("Plumber")) },
-            elevation = CardDefaults.cardElevation(10.dp, 5.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.image2),
-                    contentDescription = stringResource(
-                        id = R.string.Image2
-                    ),
-                    alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.requiredWidth(110.dp)
-                )
-                Text(
-                    text = stringResource(id = R.string.Image2),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // Gardener
-
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .padding(0.dp, 10.dp)
-                .height(100.dp)
-                .fillMaxWidth()
-                .clickable { navController.navigate(Screen.WorkerList.withArgs("Gardener")) },
-            elevation = CardDefaults.cardElevation(10.dp, 5.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.image3),
-                    contentDescription = stringResource(
-                        id = R.string.Image3
-                    ),
-                    alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.requiredWidth(110.dp)
-                )
-                Text(
-                    text = stringResource(id = R.string.Image3),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // House Cleaner
-
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .padding(0.dp, 10.dp)
-                .height(100.dp)
-                .fillMaxWidth()
-                .clickable { navController.navigate(Screen.WorkerList.withArgs("House Cleaner")) },
-            elevation = CardDefaults.cardElevation(10.dp, 5.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.image4),
-                    contentDescription = stringResource(
-                        id = R.string.Image4
-                    ),
-                    alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.requiredWidth(110.dp)
-                )
-                Text(
-                    text = stringResource(id = R.string.Image4),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // Laundry
-
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .padding(0.dp, 10.dp)
-                .height(100.dp)
-                .fillMaxWidth()
-                .clickable { navController.navigate(Screen.WorkerList.withArgs("Laundry")) },
-            elevation = CardDefaults.cardElevation(10.dp, 5.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(id = R.drawable.image5),
-                    contentDescription = stringResource(
-                        id = R.string.Image5
-                    ),
-                    alignment = Alignment.CenterStart,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.requiredWidth(110.dp)
-                )
-                Text(
-                    text = stringResource(id = R.string.Image5),
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
     }
+    )
 }
 
 
@@ -517,14 +537,14 @@ fun WorkerInfo(
                                 verticalArrangement = Arrangement.SpaceAround
                             ) {
                                 Text(
-                                    text = "Number",
+                                    text = "Fee",
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier
                                         .weight(2f)
                                         .padding(top = 10.dp)
                                 )
                                 Text(
-                                    text = phoneNo!!,
+                                    text = "₹500",
                                     style = MaterialTheme.typography.headlineLarge,
                                     modifier = Modifier.weight(4f)
                                 )
@@ -534,7 +554,7 @@ fun WorkerInfo(
                 }
             }
             Button(
-                onClick = { navController.navigate(Screen.BookingPage.route + "/$name" + "/$email") },
+                onClick = { navController.navigate(Screen.BookingPage.route + "/$name" + "/$email" + "/$phoneNo") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
@@ -558,7 +578,7 @@ fun WorkerInfo(
 
 
 @Composable
-fun BookingPage(navController: NavController, workerName: String?, workerEmail: String?) {
+fun BookingPage(navController: NavController, workerName: String?, workerEmail: String?, phoneNo: String?) {
     val context = LocalContext.current
     val dataStoreEmail = remember { StoreUserEmail(context) }
     val dataStoreUserName = remember { StoreUserName(context) }
@@ -757,6 +777,7 @@ fun BookingPage(navController: NavController, workerName: String?, workerEmail: 
                                 userEmail.value!!,
                                 workerName!!,
                                 workerEmail!!,
+                                phoneNo!!,
                                 address,
                                 selectedOption,
                                 jobType.value!!
@@ -841,6 +862,7 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
     var dialogOpen by remember { mutableStateOf(false) }
     var newRating = 0f
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(key1 = true) {
         delay(1000)
         loading = false
@@ -859,7 +881,8 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                 navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
             )
         )
-    }, content = {
+    }, snackbarHost = { SnackbarHost(snackbarHostState) },
+        content = {
         if (loading) {
             Column(
                 modifier = Modifier
@@ -916,8 +939,15 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                             Text(
                                                 text = orderList[index]?.workerName!!,
                                                 style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(bottom = 10.dp)
                                             )
+                                            SelectionContainer {
+                                                Text(
+                                                    text = orderList[index]?.phoneNo!!,
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
                                             Text(
                                                 text = orderList[index]?.jobType!!,
                                                 style = MaterialTheme.typography.bodyMedium
@@ -973,7 +1003,8 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                             Text(
                                                 text = orderList[index]?.workerName!!,
                                                 style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(bottom = 10.dp)
                                             )
                                             Text(
                                                 text = orderList[index]?.jobType!!,
@@ -1034,7 +1065,9 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                                 RatingBar(
                                                     rating = 0f,
                                                     imageVectorEmpty = ImageVector.vectorResource(id = R.drawable.star),
-                                                    imageVectorFFilled = ImageVector.vectorResource(id = R.drawable.star_full),
+                                                    imageVectorFFilled = ImageVector.vectorResource(
+                                                        id = R.drawable.star_full
+                                                    ),
                                                     itemSize = 50.dp,
                                                     animationEnabled = false,
                                                     gestureEnabled = true,
@@ -1043,7 +1076,11 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                                 Spacer(modifier = Modifier.height(30.dp))
                                                 Button(onClick = {
                                                     scope.launch {
-                                                        dbManipulation.rating(orderList[index]?.workerEmail!!, newRating)
+                                                        dbManipulation.rating(
+                                                            orderList[index]?.workerEmail!!,
+                                                            newRating.toDouble()
+                                                        )
+                                                        snackbarHostState.showSnackbar("Thank you for you rating!")
                                                     }
                                                     dialogOpen = false
                                                 }) {
@@ -1062,6 +1099,20 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                         }
                     }
                 }
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                ) {
+                    Text(
+                        text = "No Orders Placed Yet",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     })
@@ -1072,6 +1123,10 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
 @Composable
 fun WorkerMain(navController: NavController) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = remember { StoreUserEmail(context) }
+    val dataStoreJobType = StoreJobType(context)
+    val dataStoreLoginInfo = remember { LoginInfo(context) }
     val dataStoreEmail = remember { StoreWorkerEmail(context) }
     val workerEmail = dataStoreEmail.getEmail.collectAsState(initial = "")
     val dbManipulation = remember { DBManipulation() }
@@ -1080,6 +1135,7 @@ fun WorkerMain(navController: NavController) {
     var orderList = dbManipulation.getOrderWorker(workerEmail.value!!)
     val refreshScope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     fun refresh() = refreshScope.launch {
         refreshing = true
@@ -1088,7 +1144,8 @@ fun WorkerMain(navController: NavController) {
         refreshing = false
     }
     val state = rememberPullRefreshState(refreshing, ::refresh)
-    Scaffold(topBar = {
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
         TopAppBar(
             title = { Text(text = "Available Jobs") },
             navigationIcon = {
@@ -1099,8 +1156,28 @@ fun WorkerMain(navController: NavController) {
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-            )
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            actions = {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        scope.launch {
+                            dataStore.saveEmail("")
+                            dataStoreEmail.saveEmail("")
+                            dataStoreJobType.saveJobType("")
+                            dataStoreLoginInfo.saveLoginInfo("false")
+                            snackbarHostState.showSnackbar("Logged Out")
+                        }
+                        navController.navigate(Screen.SetupScreen.route)
+                    }) {
+                        Icon(painter = painterResource(id = R.drawable.logout), contentDescription = "Logout", modifier = Modifier.size(30.dp))
+                    }
+                }
+            }
         )
     }, content = {
         if (loading) {
@@ -1163,7 +1240,8 @@ fun WorkerMain(navController: NavController) {
                                                 Text(
                                                     text = orderList[index]?.userName!!,
                                                     style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(bottom = 10.dp)
                                                 )
                                                 Text(
                                                     text = orderList[index]?.address!!,
@@ -1267,7 +1345,8 @@ fun WorkerMain(navController: NavController) {
                                                 Text(
                                                     text = orderList[index]?.userName!!,
                                                     style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(bottom = 10.dp)
                                                 )
                                                 Text(
                                                     text = orderList[index]?.address!!,
@@ -1287,9 +1366,11 @@ fun WorkerMain(navController: NavController) {
                     PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
                 }
             } else {
-                Box(modifier = Modifier
-                    .padding(it)
-                    .pullRefresh(state)) {
+                Box(
+                    modifier = Modifier
+                        .padding(it)
+                        .pullRefresh(state)
+                ) {
                     Column(
                         modifier = Modifier
                             .padding(it)

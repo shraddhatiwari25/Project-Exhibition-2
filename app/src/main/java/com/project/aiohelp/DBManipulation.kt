@@ -4,7 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -79,6 +81,7 @@ class DBManipulation {
         userEmail: String,
         workerName: String,
         workerEmail: String,
+        phoneNo: String,
         address: String,
         paymentMethod: String,
         jobType: String
@@ -88,7 +91,7 @@ class DBManipulation {
         val month = calendar.get(Calendar.MONTH) + 1
         val monthName = calendar.getDisplayName(month, Calendar.SHORT, Locale.US)
         val date = "$day $monthName"
-        val order = OrderModel(userName, userEmail, workerName, workerEmail, false, address, paymentMethod, jobType, date)
+        val order = OrderModel(userName, userEmail, workerName, workerEmail, phoneNo, false, address, paymentMethod, jobType, date)
 
         db.collection("Workers").document(workerEmail).update("busy", true)
         db.collection("Orders").document("$userEmail$workerEmail$date").set(order)
@@ -104,9 +107,9 @@ class DBManipulation {
                         val c: OrderModel? = d.toObject(OrderModel::class.java)
                         orderList.add(c)
                     }
-                    loading.value = false
                 }
-            }
+                loading.value = false
+            }.addOnFailureListener { loading.value = false }
         return orderList
     }
 
@@ -134,13 +137,13 @@ class DBManipulation {
         db.collection("Orders").document("$userEmail$workerEmail$date").update("completed", true)
     }
 
-    fun rating(workerEmail: String, newRating: Float) {
-        var ratings = 0f
-        var noOfRatings = 0
+    fun rating(workerEmail: String, newRating: Double) {
+        var ratings = 0.0
+        var noOfRatings: Long = 0
         db.collection("Workers").document(workerEmail).get()
             .addOnSuccessListener {
-                ratings = it.get("ratings") as Float
-                noOfRatings = it.get("noOfRatings") as Int
+                ratings = (it.get("ratings") as Double)
+                noOfRatings = it.get("noOfRatings") as Long
             }
         ratings = ((ratings * noOfRatings) + newRating)/(noOfRatings + 1)
         noOfRatings += 1
