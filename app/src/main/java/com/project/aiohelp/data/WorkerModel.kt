@@ -7,5 +7,7 @@ data class WorkerModel(
     var email: String? = null,
     var pass: String? = null,
     var job: String? = null,
-    var busy: Boolean = false
+    var busy: Boolean = false,
+    var ratings: Float = 0f,
+    var noOfRatings: Int = 0
 )

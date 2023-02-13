@@ -48,16 +48,7 @@ class DBManipulation {
         pass: String,
         job: String
     ) {
-        val worker = hashMapOf(
-            "name" to name,
-            "age" to age,
-            "phNo" to phNo,
-            "email" to email,
-            "pass" to pass,
-            "job" to job,
-            "rating" to 0f,
-            "busy" to false
-        )
+        val worker = WorkerModel(name, age, phNo, email, pass, job, false, 0f, 0)
         db.collection("Workers").document(email).set(worker)
     }
 
@@ -139,6 +130,21 @@ class DBManipulation {
 
     fun completeOrder(workerEmail: String, userEmail: String, date: String) {
         db.collection("Orders").document("$userEmail$workerEmail$date").update("completed", true)
+    }
+
+    fun rating(workerEmail: String, newRating: Float) {
+        var ratings = 0f
+        var noOfRatings = 0
+        db.collection("Workers").document(workerEmail).get()
+            .addOnSuccessListener {
+                ratings = it.get("ratings") as Float
+                noOfRatings = it.get("noOfRatings") as Int
+            }
+        ratings = ((ratings * noOfRatings) + newRating)/(noOfRatings + 1)
+        noOfRatings += 1
+
+        db.collection("Workers").document(workerEmail).update("ratings", ratings)
+        db.collection("Workers").document(workerEmail).update("noOfRatings", noOfRatings)
     }
 }
 

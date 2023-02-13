@@ -983,6 +983,25 @@ fun OrdersPage(navController: NavController, userEmail: String?) {
                                             style = MaterialTheme.typography.bodyLarge
                                         )
                                     }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Button(
+                                            onClick = {  },
+                                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                                            modifier = Modifier.padding(end = 7.dp)
+                                        ) {
+                                            Text(
+                                                text = "Rate",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
