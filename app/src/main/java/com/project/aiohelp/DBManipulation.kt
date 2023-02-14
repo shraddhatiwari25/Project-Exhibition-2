@@ -135,6 +135,7 @@ class DBManipulation {
 
     fun completeOrder(workerEmail: String, userEmail: String, date: String) {
         db.collection("Orders").document("$userEmail$workerEmail$date").update("completed", true)
+        db.collection("Workers").document(workerEmail).update("busy", false)
     }
 
     fun rating(workerEmail: String, newRating: Double) {
