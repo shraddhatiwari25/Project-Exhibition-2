@@ -9,4 +9,6 @@ This is a concept app for a Hiring service for workers like carpenters, plumbers
    - [Laundry Image Designed by sangidan](https://www.vectorstock.com/royalty-free-vector/laundry-logo-icon-vector-25858056)
 3. [Vecteezy](https://www.vecteezy.com/)
 4. [Unblast](https://unblast.com)
-![image10](https://github.com/user-attachments/assets/1464b406-a0b8-4a30-8e5e-b4a39562a413)
+![image10](https://github.com/user-attachments/assets/1464b406-a0b8-4a30-8e5e-b4a39562a413)![image7](https://github.com/user-attachments/assets/d7604d67-374f-42eb-8854-c40c04fe54e8)
+![image6](https://github.com/user-attachments/assets/62d36a70-070b-4855-b430-04aa84ef9f6d)
+
